@@ -41,7 +41,7 @@ motor_torque = Unitwise(motor.torque(current: amps), 'N.m')
 ratio = (torque.to_f / motor_torque.to_f).to_i
 puts "Ratio: 1:#{ratio}"
 out_rpm = motor.speed(current: amps).to_f / ratio
-circumference = 2 * Math::PI * radius.to_f
-speed = Unitwise(out_rpm * circumference, 'inch/minute')
-speed = speed.to_f / (60 * 12) #convert to ft/s, unitwise can't do this
+puts "Resulting motor RPM: #{motor.speed(current: amps).to_f} -> #{out_rpm}"
+circumference = 2 * Math::PI * radius.to_foot.to_f
+speed = out_rpm * circumference / 60 # convert ft/min -> ft/sec, unitwise can't do this
 puts "Speed: #{speed} ft/s"
