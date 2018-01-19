@@ -26,6 +26,10 @@ motor =
   case motor_type
   when "cim"
     CIM.new(motor_cnt)
+  when "mini"
+    MiniCIM.new(motor_cnt)
+  when "775"
+    Pro775.new(motor_cnt)
   else
     puts "Invalid motor type!"
   end
