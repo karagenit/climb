@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require_relative '../vex/motor.rb'
+require 'vex-motors'
 require 'unitwise'
 
 print "Robot Weight (lbs): "
@@ -26,11 +26,11 @@ while true
   motor =
     case motor_type
     when "cim"
-      CIM.new(motor_cnt)
+      Motor::CIM.new(motor_cnt)
     when "mini"
-      MiniCIM.new(motor_cnt)
+      Motor::MiniCIM.new(motor_cnt)
     when "775"
-      Pro775.new(motor_cnt)
+      Motor::Pro775.new(motor_cnt)
     else
       puts "Invalid motor type!"
     end
