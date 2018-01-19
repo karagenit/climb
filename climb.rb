@@ -15,14 +15,24 @@ force_g = (mass * accel_g).to_newton
 torque = force_g * radius
 
 puts "Lift Torque Required: #{torque.to_f}"
+puts "-----------------------------"
 
-puts "40 Amp Max Calculations"
-cim = CIM.new
-motor_torque = Unitwise(cim.torque(current: 40), 'N.m')
-ratio = torque.to_f / motor_torque.to_f
-puts "Ratio: #{ratio}"
+print "Motor Type (CIM, mini, 775): "
+motor_type = gets.chomp.downcase
+print "Motor #: "
+motor_cnt = gets.to_i
 
-puts "Peak Power Calculations (2670 RPM)"
-motor_torque = Unitwise(cim.torque(speed: 2670), 'N.m')
-ratio = torque.to_f / motor_torque.to_f
-puts "Ratio: #{ratio}"
+motor =
+  case motor_type
+  when "cim"
+    CIM.new(motor_cnt)
+  else
+    puts "Invalid motor type!"
+  end
+
+print "Target Amperage (total, all motors): "
+amps = gets.to_i
+
+motor_torque = Unitwise(motor.torque(current: amps), 'N.m')
+ratio = (torque.to_f / motor_torque.to_f).to_i
+puts "Ratio: 1:#{ratio}"
