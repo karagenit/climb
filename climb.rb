@@ -10,7 +10,7 @@ radius = Unitwise(gets.to_f, 'inch')
 
 mass = weight.to_kg
 radius = radius.to_m
-accel_g = Unitwise(9.81, 'm') / (Unitwise(1, 's') ** 2)
+accel_g = Unitwise(9.81, 'meter') / (Unitwise(1, 'second') ** 2)
 force_g = (mass * accel_g).to_newton
 torque = force_g * radius
 
@@ -40,3 +40,8 @@ amps = gets.to_i
 motor_torque = Unitwise(motor.torque(current: amps), 'N.m')
 ratio = (torque.to_f / motor_torque.to_f).to_i
 puts "Ratio: 1:#{ratio}"
+out_rpm = motor.speed(current: amps).to_f / ratio
+circumference = 2 * Math::PI * radius.to_f
+speed = Unitwise(out_rpm * circumference, 'inch/minute')
+speed = speed.to_f / (60 * 12) #convert to ft/s, unitwise can't do this
+puts "Speed: #{speed} ft/s"
