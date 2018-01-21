@@ -14,14 +14,14 @@ accel_g = Unitwise(9.81, 'meter') / (Unitwise(1, 'second') ** 2)
 force_g = (mass * accel_g).to_newton
 torque = force_g * radius
 
-puts "Lift Torque Required: #{torque.to_f}"
+puts "Lift Torque Required: #{torque.to_f.round(2)} Nm"
 
 while true
   puts "-----------------------------"
-  print "Motor Type (CIM, mini, 775): "
-  motor_type = gets.chomp.downcase
-  print "Motor #: "
-  motor_cnt = gets.to_i
+  print "Motors: "
+  input = gets.chomp.split(' ')
+  motor_type = input[1].downcase
+  motor_cnt = input[0].to_i
 
   motor =
     case motor_type
@@ -42,8 +42,7 @@ while true
   ratio = (torque.to_f / motor_torque.to_f).to_i
   puts "Ratio: 1:#{ratio}"
   out_rpm = motor.speed(current: amps).to_f / ratio
-  puts "Resulting motor RPM: #{motor.speed(current: amps).to_f} -> #{out_rpm}"
   circumference = 2 * Math::PI * radius.to_foot.to_f
   speed = out_rpm * circumference / 60 # convert ft/min -> ft/sec, unitwise can't do this
-  puts "Speed: #{speed} ft/s"
+  puts "Speed: #{speed.round(2)} ft/s"
 end
