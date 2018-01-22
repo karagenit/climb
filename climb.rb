@@ -1,20 +1,19 @@
 #!/usr/bin/env ruby
 
 require 'vex-motors'
+require 'belir'
 require 'unitwise'
+
+values = {}
 
 print "Robot Weight (lbs): "
 weight = Unitwise(gets.to_f, 'pound')
 print "Spool Radius (in): "
 radius = Unitwise(gets.to_f, 'inch')
 
-mass = weight.to_kg
-radius = radius.to_m
-accel_g = Unitwise(9.81, 'meter') / (Unitwise(1, 'second') ** 2)
-force_g = (mass * accel_g).to_newton
-torque = force_g * radius
-
-puts "Lift Torque Required: #{torque.to_f.round(2)} Nm"
+values[:mass] = weight.to_kg
+values[:radius] = radius.to_m
+GRAVITY = Unitwise(9.81, 'meter') / (Unitwise(1, 'second') ** 2)
 
 while true
   puts "-----------------------------"
@@ -35,14 +34,23 @@ while true
       puts "Invalid motor type!"
     end
 
-  print "Target Amperage (total, all motors): "
-  amps = gets.to_i
+  # required: motor, weight, radius
+  # limits (give one, get the others): amps, ratio, speed
+  # motor_torque, output_torque, amps, ratio, motor_rpm, output_rpm, output_speed
 
-  motor_torque = Unitwise(motor.torque(current: amps), 'N.m')
-  ratio = (torque.to_f / motor_torque.to_f).to_i
-  puts "Ratio: 1:#{ratio}"
-  out_rpm = motor.speed(current: amps).to_f / ratio
-  circumference = 2 * Math::PI * radius.to_foot.to_f
-  speed = out_rpm * circumference / 60 # convert ft/min -> ft/sec, unitwise can't do this
-  puts "Speed: #{speed.round(2)} ft/s"
+  equations = []
+
+  equations.push Belir::Equation.new(:output_torque, :mass, :radius) { |mass, radius| ((mass * GRAVITY).to_newton * radius).to_f }
+  equations.push Belir::Equation.new(:motor_torque, :amps) { |amps| motor.torque(current: amps) }
+  equations.push Belir::Equation.new(:ratio, :motor_torque, :output_torque) { |motor_torque, output_torque| output_torque / motor_torque }
+  equations.push Belir::Equation.new(:motor_rpm, :amps) { |amps| motor.speed(current: amps) }
+  equations.push Belir::Equation.new(:output_rpm, :motor_rpm, :ratio) { |motor_rpm, ratio| motor_rpm / ratio }
+  equations.push Belir::Equation.new(:output_speed, :output_rpm, :radius) { |output_rpm, radius| output_rpm * 2 * Math::PI * radius.to_foot.to_f / 60 } # ft/s
+
+  system = Belir::System.new(*equations)
+
+  print "Target Amperage (total, all motors): "
+  values[:amps] = gets.to_i
+
+  puts system.solve(values).inspect
 end
