@@ -49,11 +49,21 @@ while true
 
   system = Belir::System.new(*equations)
 
-  print "Target Amperage (total, all motors): "
-  values[:amps] = gets.to_i
+  print "Limitation (Amps, Ratio, Speed): "
+  input = gets.chomp.split(' ')
+  case input[1].downcase
+  when "amps"
+    values[:amps] = input[0].to_i
+  when "ratio"
+    values[:ratio] = input[0].to_i
+  when "speed"
+    values[:output_speed] = input[0].to_f
+  else
+    puts "Invalid limitation!"
+  end
 
   values = system.solve(values)
-  puts "Amps: #{values[:amps].to_i} A"
+  puts "Amps:  #{values[:amps].to_i} A"
   puts "Ratio: 1:#{values[:ratio].to_i}"
   puts "Speed: #{values[:output_speed].to_f.round(2)} ft/s"
 end
