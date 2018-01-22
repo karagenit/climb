@@ -52,5 +52,8 @@ while true
   print "Target Amperage (total, all motors): "
   values[:amps] = gets.to_i
 
-  puts system.solve(values).inspect
+  values = system.solve(values)
+  puts "Amps: #{values[:amps].to_i} A"
+  puts "Ratio: 1:#{values[:ratio].to_i}"
+  puts "Speed: #{values[:output_speed].to_f.round(2)} ft/s"
 end
