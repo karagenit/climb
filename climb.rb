@@ -64,8 +64,8 @@ while true
     values[:amps] = input[0].to_i
   when "ratio"
     values[:ratio] = input[0].to_i
-  when "speed"
-    values[:output_speed] = input[0].to_f
+  when "rpm"
+    values[:motor_rpm] = input[0].to_f
   else
     puts "Invalid limitation!"
   end
