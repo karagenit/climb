@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'vex-motors'
+require 'frc-motors'
 require 'belir'
 require 'unitwise'
 
@@ -25,18 +25,14 @@ while true
   motor =
     case motor_type
     when "cim"
-      Motor::CIM.new(motor_cnt)
+      Motors::CIM
     when "mini"
-      Motor::MiniCIM.new(motor_cnt)
+      Motors::MiniCIM
     when "775"
-      Motor::Pro775.new(motor_cnt)
+      Motors::Pro775
     else
       puts "Invalid motor type!"
     end
-
-  # required: motor, weight, radius
-  # limits (give one, get the others): amps, ratio, speed
-  # motor_torque, output_torque, amps, ratio, motor_rpm, output_rpm, output_speed
 
   values = {}
   values[:mass] = mass
@@ -44,12 +40,12 @@ while true
   equations = []
 
   equations.push Belir::Equation.new(:output_torque, :mass, :radius) { |mass, radius| ((mass * GRAVITY).to_newton * radius).to_f }
-  equations.push Belir::Equation.new(:motor_torque, :amps) { |amps| motor.torque(current: amps) }
-  equations.push Belir::Equation.new(:amps, :motor_torque) { |motor_torque| motor.current(torque: motor_torque) }
+  equations.push Belir::Equation.new(:motor_torque, :amps) { |amps| motor.find(:current, amps)[:torque] }
+  equations.push Belir::Equation.new(:amps, :motor_torque) { |motor_torque| motor.find(:torque, motor_torque)[:current] }
   equations.push Belir::Equation.new(:ratio, :motor_torque, :output_torque) { |motor_torque, output_torque| output_torque / motor_torque }
   equations.push Belir::Equation.new(:motor_torque, :ratio, :output_torque) { |ratio, output_torque| output_torque / ratio }
-  equations.push Belir::Equation.new(:motor_rpm, :amps) { |amps| motor.speed(current: amps) }
-  equations.push Belir::Equation.new(:amps, :motor_rpm) { |motor_rpm| motor.current(speed: motor_rpm) }
+  equations.push Belir::Equation.new(:motor_rpm, :amps) { |amps| motor.find(:current, amps)[:speed] }
+  equations.push Belir::Equation.new(:amps, :motor_rpm) { |motor_rpm| motor.find(:speed, motor_rpm)[:current] }
   equations.push Belir::Equation.new(:output_rpm, :motor_rpm, :ratio) { |motor_rpm, ratio| motor_rpm / ratio }
   equations.push Belir::Equation.new(:motor_rpm, :output_rpm, :ratio) { |output_rpm, ratio| output_rpm * ratio }
   equations.push Belir::Equation.new(:output_speed, :output_rpm, :radius) { |output_rpm, radius| output_rpm * 2 * Math::PI * radius.to_foot.to_f / 60 } # ft/s
